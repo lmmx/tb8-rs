@@ -3,7 +3,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use polars::prelude::*;
+// use polars::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::Instant;

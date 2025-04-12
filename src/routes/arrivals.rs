@@ -64,7 +64,7 @@ async fn get_arrivals_by_station(
     info!("Received query={}, lines={}", query, lines);
     
     // The station ID is in the query parameter
-    let station_id = query;
+    let station_id = query.clone();
     
     // In the Python version, this handles multiple line IDs
     // For simplicity, we'll use the first line in the list
@@ -76,6 +76,6 @@ async fn get_arrivals_by_station(
         all_arrivals.extend(arrivals);
     }
     
-    let response = create_response(start_time, &query, all_arrivals);
+    let response = create_response(start_time, &station_id, all_arrivals);
     Ok(Json(response))
 }

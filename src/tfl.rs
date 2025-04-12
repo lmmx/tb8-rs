@@ -49,9 +49,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let lines: Vec<Line> = response.json()
@@ -73,9 +72,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let lines: Vec<Line> = response.json()
@@ -97,9 +95,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let lines: Vec<Line> = response.json()
@@ -121,9 +118,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let predictions: Vec<Prediction> = response.json()
@@ -145,9 +141,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let predictions: Vec<Prediction> = response.json()
@@ -169,9 +164,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let disruptions: Vec<Disruption> = response.json()
@@ -193,9 +187,8 @@ impl TflClient {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(AppError::TflApiError(
-                reqwest::Error::status(status, text.into_bytes())
-            ));
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
         }
         
         let disruptions: Vec<Disruption> = response.json()

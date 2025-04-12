@@ -54,7 +54,7 @@ async fn get_lines(
 async fn get_lines_by_station(
     State(tfl_client): State<Arc<TflClient>>,
     Query(params): Query<SqlQuery>,
-) -> AppResult<Json<Response<HashMap<String, Vec<String>>>>> {
+) -> AppResult<Json<Response<HashMap<String, serde_json::Value>>>> {
     let start_time = Instant::now();
     let query = params.query.unwrap_or_else(|| "SELECT * FROM self;".to_string());
     
@@ -66,20 +66,20 @@ async fn get_lines_by_station(
     
     // Create a few sample stations with their lines
     let mut station1 = HashMap::new();
-    station1.insert("StationUniqueId".to_string(), "940GZZLUASL".to_string());
-    station1.insert("StationName".to_string(), "Arsenal".to_string());
-    station1.insert("Lines".to_string(), "[\"piccadilly\"]".to_string());
-    
+    station1.insert("StationUniqueId".to_string(), serde_json::Value::String("940GZZLUASL".to_string()));
+    station1.insert("StationName".to_string(), serde_json::Value::String("Arsenal".to_string()));
+    station1.insert("Lines".to_string(), serde_json::json!(["piccadilly"]));
+
     let mut station2 = HashMap::new();
-    station2.insert("StationUniqueId".to_string(), "940GZZLUBKG".to_string());
-    station2.insert("StationName".to_string(), "Barking".to_string());
-    station2.insert("Lines".to_string(), "[\"district\", \"hammersmith-city\", \"overground\"]".to_string());
+    station2.insert("StationUniqueId".to_string(), serde_json::Value::String("940GZZLUBKG".to_string()));
+    station2.insert("StationName".to_string(), serde_json::Value::String("Barking".to_string()));
+    station2.insert("Lines".to_string(), serde_json::json!(["district", "hammersmith-city", "overground"]));
     
     results.push(station1);
     results.push(station2);
     
     let response = create_response(start_time, &query, results);
-    Ok(Json(response))(Json(response))
+    Ok(Json(response))
 }
 
 // Handler for /lines/:id
@@ -113,4 +113,5 @@ async fn get_lines_by_mode(
     let lines = tfl_client.get_lines_by_mode(&mode).await?;
     
     let response = create_response(start_time, &query, lines);
-    Ok
+    Ok(Json(response))
+}
