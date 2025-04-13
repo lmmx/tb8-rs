@@ -1,16 +1,16 @@
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Query, State},
     routing::get,
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::sync::Arc;
 use std::time::Instant;
-use tracing::{debug, info};
+use tracing::info;
 
 use crate::error::AppResult;
 use crate::models::{Disruption, Response};
-use crate::routes::{create_response, create_metadata};
+use crate::routes::create_response;
 use crate::tfl::TflClient;
 
 pub fn disruption_routes() -> Router {

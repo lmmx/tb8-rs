@@ -1,6 +1,6 @@
 use std::env;
 use reqwest::{Client, Url};
-use tracing::{debug, error};
+use tracing::debug;
 
 use crate::error::{AppError, AppResult};
 use crate::models::*;

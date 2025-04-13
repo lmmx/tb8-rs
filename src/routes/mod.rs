@@ -3,8 +3,7 @@ pub mod stations;
 pub mod arrivals;
 pub mod disruption;
 
-use chrono::{DateTime, Duration, Utc};
-use serde::{Deserialize, Serialize};
+use chrono::Utc;
 use std::time::Instant;
 
 use crate::models::{ErrorResponse, MetaData, Response};

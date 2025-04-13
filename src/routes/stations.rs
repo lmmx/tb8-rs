@@ -1,18 +1,16 @@
 use axum::{
-    extract::{Path, Query, State},
+    extract::Query,
     routing::get,
     Json, Router,
 };
 // use polars::prelude::*;
-use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use serde::Deserialize;
 use std::time::Instant;
-use tracing::{debug, info};
+use tracing::info;
 
 use crate::error::AppResult;
 use crate::models::{Station, StationPoint, Response};
-use crate::routes::{create_response, create_metadata};
-use crate::tfl::TflClient;
+use crate::routes::create_response;
 
 pub fn stations_routes() -> Router {
     Router::new()

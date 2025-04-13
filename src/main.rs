@@ -4,7 +4,7 @@ mod routes;
 mod tfl;
 
 use axum::{
-    http::{HeaderValue, Method},
+    http::Method,
     routing::get,
     Router,
 };
