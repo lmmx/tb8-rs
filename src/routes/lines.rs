@@ -52,7 +52,7 @@ async fn get_lines(
 // In the Python version, this uses polars dataframes
 // For a simple implementation, we'll mock this endpoint
 async fn get_lines_by_station(
-    State(tfl_client): State<Arc<TflClient>>,
+    State(_tfl_client): State<Arc<TflClient>>,
     Query(params): Query<SqlQuery>,
 ) -> AppResult<Json<Response<HashMap<String, serde_json::Value>>>> {
     let start_time = Instant::now();
@@ -86,7 +86,7 @@ async fn get_lines_by_station(
 async fn get_line_by_id(
     State(tfl_client): State<Arc<TflClient>>,
     Path(id): Path<String>,
-    Query(params): Query<SqlQuery>,
+    Query(_params): Query<SqlQuery>,
 ) -> AppResult<Json<Response<Line>>> {
     let start_time = Instant::now();
     let query = format!("id={}", id);
@@ -103,7 +103,7 @@ async fn get_line_by_id(
 async fn get_lines_by_mode(
     State(tfl_client): State<Arc<TflClient>>,
     Path(mode): Path<String>,
-    Query(params): Query<SqlQuery>,
+    Query(_params): Query<SqlQuery>,
 ) -> AppResult<Json<Response<Line>>> {
     let start_time = Instant::now();
     let query = format!("mode={}", mode);
