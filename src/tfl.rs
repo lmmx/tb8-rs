@@ -79,11 +79,6 @@ impl TflClient {
             })
     }
 
-    pub async fn get_lines(&self) -> AppResult<Vec<Line>> {
-        debug!("Fetching all lines");
-        self.perform_request("/Line").await
-    }
-    
     pub async fn get_line_by_id(&self, line_id: &str) -> AppResult<Vec<Line>> {
         debug!("Fetching line by id: {}", line_id);
         self.perform_request(&format!("/Line/{}", line_id)).await

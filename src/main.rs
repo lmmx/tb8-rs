@@ -16,8 +16,7 @@ use tracing::info;
 use tracing_subscriber;
 
 use crate::routes::{
-    arrivals::arrivals_routes, disruption::disruption_routes, lines::lines_routes,
-    stations::stations_routes,
+    arrivals::arrivals_routes, disruption::disruption_routes, stations::stations_routes,
 };
 
 #[tokio::main]
@@ -40,7 +39,6 @@ async fn main() {
 
     // Create the router with our routes
     let app = Router::new()
-        .merge(lines_routes())
         .merge(stations_routes())
         .merge(arrivals_routes())
         .merge(disruption_routes())
