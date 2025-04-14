@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, NaiveTime, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 // Define core models equivalent to the Python Pydantic models
@@ -206,13 +206,13 @@ pub struct Prediction {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PredictionTiming {
-    #[serde(rename = "countdownServerAdjustment")]
-    pub countdown_server_adjustment: Option<NaiveTime>,
-    pub source: Option<NaiveDateTime>,
-    pub insert: Option<NaiveDateTime>,
+    // #[serde(rename = "countdownServerAdjustment")]
+    // pub countdown_server_adjustment: Option<NaiveTime>,
+    // pub source: Option<NaiveDateTime>,
+    // pub insert: Option<NaiveDateTime>,
     pub read: Option<DateTime<Utc>>,
     pub sent: Option<DateTime<Utc>>,
-    pub received: Option<NaiveDateTime>,
+    // pub received: Option<NaiveDateTime>,
 }
 
 // Station models
