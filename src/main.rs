@@ -7,7 +7,9 @@ use axum::{
     http::Method,
     routing::get,
     Router,
+    Json,
 };
+use serde_json::json;
 use std::env;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
@@ -42,10 +44,15 @@ async fn main() {
         .merge(stations_routes())
         .merge(arrivals_routes())
         .merge(disruption_routes())
-        .route("/", get(|| async { "🚨 It's time for the tb8-rs!" }))
+        .route("/", get(root_handler))
         .layer(cors);
 
     info!("Starting server on {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+// Add a handler function for the root route
+async fn root_handler() -> Json<serde_json::Value> {
+    Json(json!({ "🚨": "It's time for the tb8-rs!" }))
 }

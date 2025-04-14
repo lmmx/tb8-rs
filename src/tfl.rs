@@ -1,6 +1,8 @@
 use std::env;
+use serde::de::DeserializeOwned;
+use serde_path_to_error::deserialize;
 use reqwest::{Client, Url};
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::error::{AppError, AppResult};
 use crate::models::*;
@@ -37,6 +39,32 @@ impl TflClient {
         Ok(url)
     }
 
+    async fn deserialize_response<T>(&self, response: reqwest::Response) -> AppResult<T> 
+    where
+        T: DeserializeOwned,
+    {
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+            let err_msg = format!("HTTP error {}: {}", status, text);
+            return Err(AppError::InternalError(err_msg));
+        }
+        
+        // Get the response body as bytes
+        let bytes = response.bytes().await.map_err(AppError::TflApiError)?;
+        
+        // Use serde_path_to_error for deserialization
+        let json_deserializer = &mut serde_json::Deserializer::from_slice(&bytes);
+        serde_path_to_error::deserialize(json_deserializer)
+            .map_err(|e| {
+                AppError::DeserializationError { 
+                    path: e.path().to_string(), 
+                    message: e.to_string(),
+                    raw_data: Some(String::from_utf8_lossy(&bytes).to_string()),
+                }
+            })
+    }
+
     pub async fn get_lines(&self) -> AppResult<Vec<Line>> {
         debug!("Fetching all lines");
         let url = self.build_url("/Line")?;
@@ -46,18 +74,7 @@ impl TflClient {
             .await
             .map_err(AppError::TflApiError)?;
         
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-        
-        let lines: Vec<Line> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(lines)
+        self.deserialize_response(response).await
     }
     
     pub async fn get_line_by_id(&self, line_id: &str) -> AppResult<Vec<Line>> {
@@ -76,11 +93,7 @@ impl TflClient {
             return Err(AppError::InternalError(err_msg));
         }
         
-        let lines: Vec<Line> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(lines)
+        self.deserialize_response(response).await
     }
     
     pub async fn get_lines_by_mode(&self, mode: &str) -> AppResult<Vec<Line>> {
@@ -99,11 +112,7 @@ impl TflClient {
             return Err(AppError::InternalError(err_msg));
         }
         
-        let lines: Vec<Line> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(lines)
+        self.deserialize_response(response).await
     }
     
     pub async fn get_arrivals_by_line(&self, line_id: &str) -> AppResult<Vec<Prediction>> {
@@ -121,12 +130,8 @@ impl TflClient {
             let err_msg = format!("HTTP error {}: {}", status, text);
             return Err(AppError::InternalError(err_msg));
         }
-        
-        let predictions: Vec<Prediction> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(predictions)
+
+        self.deserialize_response(response).await
     }
     
     pub async fn get_arrivals_by_line_at_stop(&self, line_id: &str, stop_id: &str) -> AppResult<Vec<Prediction>> {
@@ -145,11 +150,7 @@ impl TflClient {
             return Err(AppError::InternalError(err_msg));
         }
         
-        let predictions: Vec<Prediction> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(predictions)
+        self.deserialize_response(response).await
     }
     
     pub async fn get_disruptions_by_line(&self, line_id: &str) -> AppResult<Vec<Disruption>> {
@@ -168,11 +169,7 @@ impl TflClient {
             return Err(AppError::InternalError(err_msg));
         }
         
-        let disruptions: Vec<Disruption> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(disruptions)
+        self.deserialize_response(response).await
     }
     
     pub async fn get_disruptions_by_mode(&self, mode: &str) -> AppResult<Vec<Disruption>> {
@@ -191,10 +188,6 @@ impl TflClient {
             return Err(AppError::InternalError(err_msg));
         }
         
-        let disruptions: Vec<Disruption> = response.json()
-            .await
-            .map_err(AppError::TflApiError)?;
-            
-        Ok(disruptions)
+        self.deserialize_response(response).await
     }
 }
