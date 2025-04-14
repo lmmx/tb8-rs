@@ -39,6 +39,20 @@ impl TflClient {
         Ok(url)
     }
 
+    async fn perform_request<T>(&self, path: &str) -> AppResult<T>
+    where
+        T: DeserializeOwned,
+    {
+        let url = self.build_url(path)?;
+
+        let response = self.client.get(url)
+            .send()
+            .await
+            .map_err(AppError::TflApiError)?;
+
+        self.deserialize_response(response).await
+    }
+
     async fn deserialize_response<T>(&self, response: reqwest::Response) -> AppResult<T> 
     where
         T: DeserializeOwned,
@@ -67,127 +81,36 @@ impl TflClient {
 
     pub async fn get_lines(&self) -> AppResult<Vec<Line>> {
         debug!("Fetching all lines");
-        let url = self.build_url("/Line")?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        self.deserialize_response(response).await
+        self.perform_request("/Line").await
     }
     
     pub async fn get_line_by_id(&self, line_id: &str) -> AppResult<Vec<Line>> {
         debug!("Fetching line by id: {}", line_id);
-        let url = self.build_url(&format!("/Line/{}", line_id))?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-        
-        self.deserialize_response(response).await
+        self.perform_request(&format!("/Line/{}", line_id)).await
     }
     
     pub async fn get_lines_by_mode(&self, mode: &str) -> AppResult<Vec<Line>> {
         debug!("Fetching lines by mode: {}", mode);
-        let url = self.build_url(&format!("/Line/Mode/{}", mode))?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-        
-        self.deserialize_response(response).await
+        self.perform_request(&format!("/Line/Mode/{}", mode)).await
     }
     
     pub async fn get_arrivals_by_line(&self, line_id: &str) -> AppResult<Vec<Prediction>> {
         debug!("Fetching arrivals for line: {}", line_id);
-        let url = self.build_url(&format!("/Line/{}/Arrivals", line_id))?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-
-        self.deserialize_response(response).await
+        self.perform_request(&format!("/Line/{}/Arrivals", line_id)).await
     }
     
     pub async fn get_arrivals_by_line_at_stop(&self, line_id: &str, stop_id: &str) -> AppResult<Vec<Prediction>> {
         debug!("Fetching arrivals for line {} at stop {}", line_id, stop_id);
-        let url = self.build_url(&format!("/Line/{}/Arrivals/{}", line_id, stop_id))?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-        
-        self.deserialize_response(response).await
+        self.perform_request(&format!("/Line/{}/Arrivals/{}", line_id, stop_id)).await
     }
     
     pub async fn get_disruptions_by_line(&self, line_id: &str) -> AppResult<Vec<Disruption>> {
         debug!("Fetching disruptions for line: {}", line_id);
-        let url = self.build_url(&format!("/Line/{}/Disruption", line_id))?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-        
-        self.deserialize_response(response).await
+        self.perform_request(&format!("/Line/{}/Disruption", line_id)).await
     }
     
     pub async fn get_disruptions_by_mode(&self, mode: &str) -> AppResult<Vec<Disruption>> {
         debug!("Fetching disruptions for mode: {}", mode);
-        let url = self.build_url(&format!("/Line/Mode/{}/Disruption", mode))?;
-        
-        let response = self.client.get(url)
-            .send()
-            .await
-            .map_err(AppError::TflApiError)?;
-        
-        if !response.status().is_success() {
-            let status = response.status();
-            let text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-            let err_msg = format!("HTTP error {}: {}", status, text);
-            return Err(AppError::InternalError(err_msg));
-        }
-        
-        self.deserialize_response(response).await
+        self.perform_request(&format!("/Line/Mode/{}/Disruption", mode)).await
     }
 }
