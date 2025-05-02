@@ -3,17 +3,11 @@ mod models;
 mod routes;
 mod tfl;
 
-use axum::{
-    http::Method,
-    routing::get,
-    Router,
-    Json,
-};
+use axum::{http::Method, routing::get, Json, Router};
 use serde_json::json;
 use std::env;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
-use tracing_subscriber;
 
 use crate::routes::{
     arrivals::arrivals_routes, disruption::disruption_routes, stations::stations_routes,
@@ -23,10 +17,10 @@ use crate::routes::{
 async fn main() {
     // Initialize logging
     tracing_subscriber::fmt::init();
-    
+
     // Load env vars (for API keys)
     dotenv::dotenv().ok();
-    
+
     // Get the port from env or default to 4000
     let port = env::var("PORT").unwrap_or_else(|_| "4000".to_string());
     let addr = format!("0.0.0.0:{}", port);

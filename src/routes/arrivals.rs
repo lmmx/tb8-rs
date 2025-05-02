@@ -15,7 +15,7 @@ use crate::tfl::TflClient;
 
 pub fn arrivals_routes() -> Router {
     let tfl_client = Arc::new(TflClient::new());
-    
+
     Router::new()
         .route("/arrivals-by-lines", get(get_arrivals_by_lines))
         .route("/arrivals-by-station", get(get_arrivals_by_station))
@@ -35,19 +35,19 @@ async fn get_arrivals_by_lines(
 ) -> AppResult<Json<Response<Prediction>>> {
     let start_time = Instant::now();
     let query = params.query;
-    
+
     info!("Received query={}", query);
-    
+
     // In the Python version, this parses comma-separated line IDs
     // We'll handle a single line ID for simplicity
     let lines: Vec<&str> = query.split(',').collect();
     let mut all_arrivals = Vec::new();
-    
+
     for line in lines {
         let arrivals = tfl_client.get_arrivals_by_line(line.trim()).await?;
         all_arrivals.extend(arrivals);
     }
-    
+
     let response = create_response(start_time, &query, all_arrivals);
     Ok(Json(response))
 }
@@ -60,22 +60,24 @@ async fn get_arrivals_by_station(
     let start_time = Instant::now();
     let query = params.query;
     let lines = params.lines.unwrap_or_else(|| "tube".to_string());
-    
+
     info!("Received query={}, lines={}", query, lines);
-    
+
     // The station ID is in the query parameter
     let station_id = query.clone();
-    
+
     // In the Python version, this handles multiple line IDs
     // For simplicity, we'll use the first line in the list
     let line_ids: Vec<&str> = lines.split(',').collect();
     let mut all_arrivals = Vec::new();
-    
+
     for line_id in line_ids {
-        let arrivals = tfl_client.get_arrivals_by_line_at_stop(line_id.trim(), &station_id).await?;
+        let arrivals = tfl_client
+            .get_arrivals_by_line_at_stop(line_id.trim(), &station_id)
+            .await?;
         all_arrivals.extend(arrivals);
     }
-    
+
     let response = create_response(start_time, &station_id, all_arrivals);
     Ok(Json(response))
 }
