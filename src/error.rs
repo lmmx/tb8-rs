@@ -10,13 +10,14 @@ use thiserror::Error;
 pub enum AppError {
     #[error("TfL API request failed: {0}")]
     TflApiError(#[from] reqwest::Error),
-    
+
     #[error("Failed to parse TfL response: {0}")]
     ParseError(String),
-    
+
     #[error("Internal server error: {0}")]
     InternalError(String),
-    
+
+    #[allow(dead_code)]
     #[error("Not found: {0}")]
     NotFound(String),
 
@@ -35,7 +36,11 @@ impl IntoResponse for AppError {
             AppError::ParseError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err, None),
             AppError::InternalError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err, None),
             AppError::NotFound(err) => (StatusCode::NOT_FOUND, err, None),
-            AppError::DeserializationError { path, message, raw_data } => {
+            AppError::DeserializationError {
+                path,
+                message,
+                raw_data,
+            } => {
                 let extracted_detail = raw_data.map(|data| {
                     // Try to get the relevant portion of the JSON
                     if let Ok(json_value) = serde_json::from_str::<serde_json::Value>(&data) {
@@ -72,7 +77,10 @@ impl IntoResponse for AppError {
 }
 
 // Helper function to extract a value at a given path from JSON
-fn extract_value_at_path<'a>(value: &'a serde_json::Value, path: &[&str]) -> Option<&'a serde_json::Value> {
+fn extract_value_at_path<'a>(
+    value: &'a serde_json::Value,
+    path: &[&str],
+) -> Option<&'a serde_json::Value> {
     if path.is_empty() {
         return Some(value);
     }
@@ -86,7 +94,7 @@ fn extract_value_at_path<'a>(value: &'a serde_json::Value, path: &[&str]) -> Opt
         serde_json::Value::Array(arr) => {
             // Handle array indexes in path like [0]
             if path[0].starts_with('[') && path[0].ends_with(']') {
-                if let Ok(index) = path[0][1..path[0].len()-1].parse::<usize>() {
+                if let Ok(index) = path[0][1..path[0].len() - 1].parse::<usize>() {
                     if index < arr.len() {
                         return extract_value_at_path(&arr[index], &path[1..]);
                     }
