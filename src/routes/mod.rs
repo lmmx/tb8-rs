@@ -41,3 +41,26 @@ pub fn create_error_response(start_time: Instant, query: &str, error: String) ->
         error,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_response() {
+        // Setup
+        let start_time = Instant::now();
+        let query = "test_query";
+        let results = vec!["result1", "result2"];
+
+        // Execute
+        let response = create_response(start_time, query, results);
+
+        // Verify
+        assert!(response.success);
+        assert_eq!(response.results, vec!["result1", "result2"]);
+        assert_eq!(response.context.query, "test_query");
+        // We can't test exact timing, but we can verify it's not negative
+        assert!(response.context.response_latency >= 0.0);
+    }
+}

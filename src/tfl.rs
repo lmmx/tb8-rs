@@ -124,3 +124,26 @@ impl TflClient {
             .await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build_url() {
+        // No need for actual API keys for this test
+        env::set_var("TFL_API_PRIMARY_ACCESS_KEY", "dummy_key");
+
+        let client = TflClient::new();
+        let url = client.build_url("/Line/victoria").unwrap();
+
+        assert_eq!(url.scheme(), "https");
+        assert_eq!(url.host_str().unwrap(), "api.tfl.gov.uk");
+        assert_eq!(url.path(), "/Line/victoria");
+
+        // Check that query parameters exist
+        let query: std::collections::HashMap<_, _> = url.query_pairs().into_owned().collect();
+        assert!(query.contains_key("app_id"));
+        assert!(query.contains_key("app_key"));
+    }
+}

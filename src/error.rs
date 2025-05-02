@@ -107,3 +107,15 @@ fn extract_value_at_path<'a>(
 }
 
 pub type AppResult<T> = Result<T, AppError>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_not_found_error_response() {
+        let error = AppError::NotFound("Station not found".to_string());
+        let response = error.into_response();
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+}
